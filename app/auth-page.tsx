@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Shield, ArrowRight, User, Users, BookOpen, Camera, Check, X } from "lucide-react"
@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import RoleSelection from "../role-selection"
 
 export default function AuthPage() {
   const router = useRouter()
@@ -28,10 +29,12 @@ export default function AuthPage() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
   const [showFaceVerification, setShowFaceVerification] = useState(false)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  const [showRoleSelection, setShowRoleSelection] = useState(false)
   const [signupFormData, setSignupFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    regno: "",
     password: "",
     confirmPassword: "",
   })
@@ -47,6 +50,14 @@ export default function AuthPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+
+  useEffect(() => {
+    // Check if user is already logged in with a role
+    const storedRole = localStorage.getItem("userRole")
+    if (storedRole) {
+      router.push("/dashboard")
+    }
+  }, [router])
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -129,34 +140,31 @@ export default function AuthPage() {
     setIsLoading(true)
 
     try {
-      // This is where you would integrate with PostgreSQL
-      // Example fetch call (replace with your actual endpoint)
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     email: loginFormData.email,
-      //     password: loginFormData.password,
-      //     role: selectedRole
-      //   })
-      // })
+      // For demo purposes, we'll use a simple check
+      if (loginFormData.email.toLowerCase() === "user@example.com" && loginFormData.password === "pass123") {
+        // Store the selected role in localStorage
+        localStorage.setItem("userRole", selectedRole as string)
 
-      // Simulating a PostgreSQL check
-      // In a real implementation, this would be a server-side check
-      const mockUserExists = loginFormData.email === "user@example.com" && loginFormData.password === "password123"
-
-      if (mockUserExists) {
         toast({
           title: "Login successful",
           description: `Welcome back! You are logged in as ${selectedRole}`,
         })
+
         router.push("/dashboard")
       } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive",
-        })
+        // In a real app, you would make an API call here
+        // Simulate API call
+        setTimeout(() => {
+          // Store the selected role in localStorage for demo
+          localStorage.setItem("userRole", selectedRole as string)
+
+          toast({
+            title: "Login successful",
+            description: `Welcome back! You are logged in as ${selectedRole}`,
+          })
+
+          router.push("/dashboard")
+        }, 1000)
       }
     } catch (error) {
       toast({
@@ -240,31 +248,21 @@ export default function AuthPage() {
     setIsLoading(true)
 
     try {
-      // This is where you would integrate with PostgreSQL to save the user
-      // Example fetch call (replace with your actual endpoint)
-      // const response = await fetch('/api/auth/signup', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     ...signupFormData,
-      //     role: selectedRole,
-      //     faceImage: capturedImage
-      //   })
-      // })
-
-      // Simulate successful signup
+      // In a real app, you would send the captured image to your backend
+      // For demo purposes, we'll just simulate a successful signup
       setTimeout(() => {
         setIsLoading(false)
+
+        // Store the selected role in localStorage
+        localStorage.setItem("userRole", selectedRole as string)
+
         toast({
           title: "Account created",
-          description: "Your account has been created successfully. You can now login.",
+          description: "Your account has been created successfully.",
         })
 
-        // For demo purposes, set the mock user credentials
-        toast({
-          title: "Demo credentials",
-          description: "For testing, use email: user@example.com and password: password123",
-        })
+        // Show role selection screen
+        setShowRoleSelection(true)
       }, 1500)
     } catch (error) {
       setIsLoading(false)
@@ -306,6 +304,10 @@ export default function AuthPage() {
       color: "bg-purple-500",
     },
   ]
+
+  if (showRoleSelection) {
+    return <RoleSelection />
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[url('/grid.svg')] bg-contain">
