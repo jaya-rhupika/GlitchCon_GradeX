@@ -1,4 +1,4 @@
-#GradeX - Examination Management App
+GradeX - Examination Management App
 
 DEMO VIDEO LINKS : 
 1. VIDEO 1 - https://drive.google.com/file/d/1YrZ9LA-qPhxWF7R_qYozgivVCddF6Sie/view?usp=drive_link
